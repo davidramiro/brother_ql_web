@@ -45,7 +45,9 @@ def index():
                            default_margin_top=current_app.config['LABEL_DEFAULT_MARGIN_TOP'],
                            default_margin_bottom=current_app.config['LABEL_DEFAULT_MARGIN_BOTTOM'],
                            default_margin_left=current_app.config['LABEL_DEFAULT_MARGIN_LEFT'],
-                           default_margin_right=current_app.config['LABEL_DEFAULT_MARGIN_RIGHT']
+                           default_margin_right=current_app.config['LABEL_DEFAULT_MARGIN_RIGHT'],
+                           printer_path=current_app.config['PRINTER_PRINTER'],
+                           printer_model=current_app.config['PRINTER_MODEL']
                            )
 
 
@@ -58,8 +60,15 @@ def get_font_styles():
 
 @bp.route('/api/preview', methods=['POST', 'GET'])
 def get_preview_from_image():
+    # Set log level if provided
+    log_level = request.values.get('log_level')
+    if log_level:
+        import logging
+        level = getattr(logging, log_level.upper(), None)
+        if isinstance(level, int):
+            current_app.logger.setLevel(level)
     label = create_label_from_request(request)
-    im = label.generate()
+    im = label.generate(rotate=True)
 
     return_format = request.values.get('return_format', 'png')
 
@@ -88,6 +97,13 @@ def print_text():
     return_dict = {'success': False}
 
     try:
+        # Set log level if provided
+        log_level = request.values.get('log_level')
+        if log_level:
+            import logging
+            level = getattr(logging, log_level.upper(), None)
+            if isinstance(level, int):
+                current_app.logger.setLevel(level)
         printer = create_printer_from_request(request)
         label = create_label_from_request(request)
         print_count = int(request.values.get('print_count', 1))
@@ -140,6 +156,7 @@ def create_label_from_request(request):
         'qrcode_correction': d.get('qrcode_correction', 'L'),
         'image_mode': d.get('image_mode', "grayscale"),
         'image_bw_threshold': int(d.get('image_bw_threshold', 70)),
+        'image_fit': int(d.get('image_fit', 1)) > 0,
         'font_size': int(d.get('font_size', 100)),
         'line_spacing': int(d.get('line_spacing', 100)),
         'font_family': d.get('font_family'),
@@ -159,6 +176,12 @@ def create_label_from_request(request):
             if font_family_name is None or font_style_name is None:
                 font_family_name = current_app.config['LABEL_DEFAULT_FONT_FAMILY']
                 font_style_name = current_app.config['LABEL_DEFAULT_FONT_STYLE']
+            if font_family_name not in FONTS.fonts:
+                raise LookupError("Unknown font family: %s" % font_family_name)
+            if font_style_name not in FONTS.fonts[font_family_name]:
+                font_style_name = current_app.config['LABEL_DEFAULT_FONT_STYLE']
+            if font_style_name not in FONTS.fonts[font_family_name]:
+                raise LookupError("Unknown font style: %s" % font_style_name)
             font_path = FONTS.fonts[font_family_name][font_style_name]
         except KeyError:
             raise LookupError("Couln't find the font & style")
@@ -241,6 +264,7 @@ def create_label_from_request(request):
         qr_size=context['qrcode_size'],
         qr_correction=context['qrcode_correction'],
         image=get_uploaded_image(request.files.get('image', None)),
+        image_fit=context['image_fit'],
         font_path=get_font_path(context['font_family'], context['font_style']),
         font_size=context['font_size'],
         line_spacing=context['line_spacing']

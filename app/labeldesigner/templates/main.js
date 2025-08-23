@@ -18,7 +18,9 @@ function formData(cut_once) {
         qrcode_correction: $('#qrCodeCorrection option:selected').val(),
         image_bw_threshold: $('#imageBwThreshold').val(),
         image_mode:         $('input[name=imageMode]:checked').val(),
+        image_fit:          $('#imageFitCheckbox').is(':checked') ? 1 : 0,
         print_count:       $('#printCount').val(),
+        log_level:         $('#logLevel').val(),
         {% if red_support %}
         print_color:       $('input[name=printColor]:checked').val(),
         {% endif %}
@@ -144,9 +146,6 @@ function print(cut_once = false) {
     });
 }
 
-updateStyles();
-preview()
-
 
 var imageDropZone;
 Dropzone.options.myAwesomeDropzone = {
@@ -203,4 +202,9 @@ Dropzone.options.myAwesomeDropzone = {
         // Insert a dummy image
         updatePreview('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=');
     }
+};
+
+window.onload = function() {
+    updateStyles();
+    preview();
 };
