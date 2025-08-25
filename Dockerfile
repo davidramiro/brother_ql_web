@@ -1,10 +1,14 @@
 # syntax=docker/dockerfile:1.6
 FROM --platform=$TARGETPLATFORM python:3-alpine
 
-WORKDIR /app
-COPY . /app
-
 ARG TARGETARCH
+WORKDIR /app
+
+# First, copy only the requirements.txt
+# This ensures the dependencies can be sourced from docker's cache (and save a
+# lot of time during building) *unless* the requirements.txt file actually
+# changes
+COPY ./requirements.txt /app/requirements.txt
 
 RUN if [ $TARGETARCH == "arm" ]; then \
         apk update --no-cache && \
@@ -34,6 +38,7 @@ RUN apk update --no-cache && \
     ttf-dejavu \
     ttf-liberation \
     ttf-droid \
+    ttf-freefont \
     font-terminus \
     font-inconsolata \
     font-dejavu \
@@ -46,6 +51,8 @@ RUN if [ $TARGETARCH == "arm" ]; then \
         # Clean up build dependencies to reduce image size
         apk del gcc musl-dev \
     ; fi
+
+COPY . /app
 
 EXPOSE 8013
 ENTRYPOINT ["python3", "run.py"]
