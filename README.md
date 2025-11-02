@@ -1,21 +1,18 @@
 # brother_ql_web
 
-This is a web service to print labels on Brother QL label printers.
+## Archival note
 
-You need Python 3 or Docker for this software to work.
-
-The web interface is [responsive](https://en.wikipedia.org/wiki/Responsive_web_design).
-There's also a screenshot showing [how it looks on a smartphone](./screenshots/Label-Designer_Phone.png)
+This repo will not be maintained further as [DL6ER/brother_ql_web](https://github.com/DL6ER/brother_ql_web) merged all changes from this fork and put a lot of effort into additional features and UX improvements. Migrating is as easy as using `ghcr.io/dl6er/brother-ql-web:latest` as the docker image, environment settings should be cross compatible.
 
 ## Fork info
 
 There are a lot of forks of the `brother_ql` and `brother_ql_web` repos from [pklaus](https://github.com/pklaus/brother_ql). I tried to cherry pick a fairly recent and well maintainable state by using [matmair/brother_ql-inventree](https://github.com/matmair/brother_ql-inventree) as a dependency for communicating with the printers and [tbnobody/brother_ql_web](https://github.com/tbnobody/brother_ql_web) as a base for the frontend as there have been a few fixes and improvements implemented over there.
 
-For now I have added Docker support and the ability to print red images on supported paper/printers.
+Feature wise this fork adds Docker support and the ability to print red images on supported paper/printers.
 
 ![Screenshot](./screenshots/Label-Designer_Desktop.png)
 
-### Additional Features
+### Upstream features
 
 -   Print text as QR Code
     -   Add text to QR Code
@@ -29,8 +26,6 @@ For now I have added Docker support and the ability to print red images on suppo
     -   Cut only after the last label
 -   Migrated GUI to Bootstrap 4
 -   Make preview for round labels.. round
--   Print images on red/black paper
--   Dockerized
 
 ### Run via Docker
 
